@@ -1,0 +1,13 @@
+# @ChatApp.Server_HostAddress = https://localhost:7208
+@ChatApp.Server_HostAddress = https://localhost:51317
+
+POST {{ChatApp.Server_HostAddress}}/api/sendmessage/
+UserId: 1
+Accept: application/json
+Content-Type: application/json
+
+{
+    "message": "adf"
+}
+
+###

@@ -1,0 +1,21 @@
+<div>
+  <label for="userId">You user id</label>
+  <input type="text" [disabled]="isConnected" [(ngModel)]="userName" />
+  <button [disabled]="isConnected" (click)="connect()">Connect</button>
+</div>
+
+<div *ngIf="errorMessage">
+  {{errorMessage}}
+</div>
+
+<div>
+  <input [disabled]="!isConnected" type="text" [(ngModel)]="targetUserName" />
+  <input [disabled]="!isConnected" type="text" [(ngModel)]="message" />
+  <button [disabled]="!isConnected" (click)="sendMessage()">Send message</button>
+</div>
+
+<div>
+  <div *ngFor="let msg of messagesHistory">
+    {{msg}}
+  </div>
+</div>
