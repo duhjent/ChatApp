@@ -1,7 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
 import * as signalR from "@microsoft/signalr";
-import { catchError, Observable, switchMap } from 'rxjs';
+import {catchError, Observable, Subject, switchMap} from 'rxjs';
+import {map} from 'rxjs/operators'
+
+interface ChatMessage {
+  timestamp: Date;
+  senderUserName: string;
+  targetUserName: string;
+  message: string;
+}
+
+interface SendMessageRequest {
+  targetUserName: string;
+  message: string;
+}
 
 @Component({
   selector: 'app-root',
@@ -20,17 +33,25 @@ export class AppComponent implements OnInit, OnDestroy {
   private connection?: signalR.HubConnection;
   public isConnected: boolean = false;
 
-  public messagesHistory: string[] = [];
+  public messagesHistory: ChatMessage[] = [];
 
-  constructor(private httpClient: HttpClient) { }
+  private usersOnline: Subject<string[]> = new Subject<string[]>()
+  public usersOnline$: Observable<string[]>;
+
+  constructor(private httpClient: HttpClient) {
+    this.usersOnline$ = this.usersOnline
+      .pipe(map(usersOnline => usersOnline.filter(userName => userName != this.userName)));
+  }
 
   ngOnDestroy(): void {
     if (this.connection) {
+      // TODO: figure out how to stop the connection asynchronously
       this.connection.stop();
     }
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
 
   public async connect() {
     this.errorMessage = null;
@@ -42,7 +63,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
     this.httpClient
-      .post('/api/login', { userName: this.userName })
+      .post('/api/login', {userName: this.userName})
       .pipe(
         switchMap(_ => {
           this.connection = new signalR
@@ -50,9 +71,13 @@ export class AppComponent implements OnInit, OnDestroy {
             .withUrl('/api/hub',)
             .build();
 
-          this.connection.on('receiveMessage', (uid, message) => {
-            this.messagesHistory.push(`${uid}: ${message}`);
+          this.connection.on('receiveMessage', (message: ChatMessage) => {
+            this.messagesHistory.push(message);
           });
+
+          this.connection.on('usersOnline', (usersList) => {
+            this.usersOnline.next(usersList);
+          })
 
           return this.connection.start();
         }),
@@ -70,12 +95,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.errorMessage = null;
 
+    if (!this.targetUserName || !this.message) {
+      return;
+    }
+
     if (this.userName == this.targetUserName) {
       this.errorMessage = 'Cannot send message to yourself';
       return;
     }
 
-    await this.connection.send('newMessage', this.targetUserName, this.message);
+    let req= <SendMessageRequest>{targetUserName: this.targetUserName, message: this.message};
+
+    await this.connection.send('newMessage', req);
 
     this.message = '';
   }

@@ -20,6 +20,8 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
 
+builder.Services.AddSingleton<OnlineUsersRepo>();
+
 var app = builder.Build();
 
 app.UseDefaultFiles();

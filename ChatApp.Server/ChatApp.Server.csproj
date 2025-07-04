@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<SpaRoot>..\chatapp.client</SpaRoot>
+		<SpaRoot>../chatapp.client</SpaRoot>
 		<SpaProxyLaunchCommand>npm start</SpaProxyLaunchCommand>
 		<SpaProxyServerUrl>https://localhost:51317</SpaProxyServerUrl>
 	</PropertyGroup>
