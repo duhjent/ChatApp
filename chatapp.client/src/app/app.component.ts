@@ -43,10 +43,9 @@ export class AppComponent implements OnInit, OnDestroy {
       .pipe(map(usersOnline => usersOnline.filter(userName => userName != this.userName)));
   }
 
-  ngOnDestroy(): void {
+  async ngOnDestroy(): Promise<void> {
     if (this.connection) {
-      // TODO: figure out how to stop the connection asynchronously
-      this.connection.stop();
+      await this.connection.stop();
     }
   }
 
@@ -109,5 +108,9 @@ export class AppComponent implements OnInit, OnDestroy {
     await this.connection.send('newMessage', req);
 
     this.message = '';
+  }
+
+  get currentUserMessages() {
+    return this.messagesHistory.filter(x => x.senderUserName == this.targetUserName || x.targetUserName == this.targetUserName);
   }
 }

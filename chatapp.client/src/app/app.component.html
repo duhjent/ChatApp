@@ -13,11 +13,11 @@
     <option *ngFor="let userName of usersOnline$ | async" [ngValue]="userName">{{userName}}</option>
   </select>
   <input [disabled]="!isConnected" type="text" [(ngModel)]="message" />
-  <button [disabled]="!isConnected" (click)="sendMessage()">Send message</button>
+  <button [disabled]="!isConnected || !targetUserName" (click)="sendMessage()">Send message</button>
 </div>
 
 <div>
-  <div *ngFor="let msg of messagesHistory">
+  <div *ngFor="let msg of currentUserMessages">
     ({{msg.timestamp | date:'dd.MM HH:mm:ss'}}) {{msg.senderUserName}}: {{msg.message}}
   </div>
 </div>
