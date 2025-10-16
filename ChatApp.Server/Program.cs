@@ -7,8 +7,6 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddLogging();
@@ -38,7 +36,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<ChatHub>("/api/hub");
+app.MapHub<NotificationHub>("/api/hub");
 
 app.MapPost("/api/login", ([FromBody] LoginBody loginBody, [FromServices] IHttpContextAccessor accessor) =>
 {

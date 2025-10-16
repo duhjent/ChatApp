@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Server
 {
-    public record SendMessageRequest(string TargetUserName, string Message);
-    
+    public record SendMessageRequest([Required] string TargetUserName, [Required] string Message);
+
     public record ChatMessage(DateTime Timestamp, string SenderUserName, string TargetUserName, string Message);
-    
+
     [Authorize]
-    public class ChatHub : Hub
+    public class NotificationHub : Hub
     {
         private readonly OnlineUsersRepo _onlineUsersRepo;
 
-        public ChatHub(OnlineUsersRepo onlineUsersRepo)
+        public NotificationHub(OnlineUsersRepo onlineUsersRepo)
         {
             _onlineUsersRepo = onlineUsersRepo;
         }
@@ -33,16 +34,18 @@ namespace ChatApp.Server
                 _onlineUsersRepo.UserOnline(Context.UserIdentifier);
                 await Clients.All.SendAsync("usersOnline", _onlineUsersRepo.OnlineUsers);
             }
+
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (Context.UserIdentifier != null)
             {
                 _onlineUsersRepo.UserOffline(Context.UserIdentifier);
                 await Clients.All.SendAsync("usersOnline", _onlineUsersRepo.OnlineUsers);
             }
+
             await base.OnDisconnectedAsync(exception);
         }
     }
